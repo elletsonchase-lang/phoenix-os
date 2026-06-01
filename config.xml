@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<image schemaversion="7.5" name="Phoenix-OS">
+  <description type="system">
+    <author>Phoenix OS contributors</author>
+    <contact>maintainers@example.invalid</contact>
+    <specification>
+      Phoenix OS is a lightweight 32-bit x86/i586 openSUSE-based desktop
+      image intended for publishing through the openSUSE Build Service and
+      for booting on legacy PCs or in the v86 browser emulator.
+    </specification>
+  </description>
+
+  <profiles>
+    <profile name="i586-live" description="Phoenix OS live ISO for legacy 32-bit x86 systems" arch="i586"/>
+    <profile name="v86-live" description="Phoenix OS live ISO tuned for the v86 browser emulator" arch="i586"/>
+    <profile name="v86-disk" description="Phoenix OS hard-disk image tuned for persistent v86 use" arch="i586"/>
+  </profiles>
+
+  <preferences profiles="i586-live,v86-live">
+    <version>0.2.0</version>
+    <packagemanager>zypper</packagemanager>
+    <locale>en_US</locale>
+    <keytable>us</keytable>
+    <timezone>UTC</timezone>
+    <rpm-excludedocs>true</rpm-excludedocs>
+    <type image="iso" primary="true" flags="overlay" hybrid="true" firmware="bios" bootpartition="false" kernelcmdline="console=tty0 console=ttyS0,115200n8 net.ifnames=0 nomodeset mitigations=off elevator=noop">
+      <bootloader name="grub2" timeout="5"/>
+    </type>
+  </preferences>
+
+  <preferences profiles="v86-disk">
+    <version>0.2.0</version>
+    <packagemanager>zypper</packagemanager>
+    <locale>en_US</locale>
+    <keytable>us</keytable>
+    <timezone>UTC</timezone>
+    <rpm-excludedocs>true</rpm-excludedocs>
+    <type image="oem" filesystem="ext4" format="raw" firmware="bios" bootpartition="true" bootfilesystem="ext4" devicepersistency="by-uuid" kernelcmdline="console=tty0 console=ttyS0,115200n8 net.ifnames=0 nomodeset mitigations=off elevator=noop">
+      <bootloader name="grub2" timeout="5"/>
+      <size unit="G">3</size>
+    </type>
+  </preferences>
+
+  <users>
+    <user name="root" password="linux" pwdformat="plain" home="/root"/>
+    <user name="phoenix" password="phoenix" pwdformat="plain" home="/home/phoenix" groups="users,wheel"/>
+  </users>
+
+  <repository type="rpm-md" alias="openSUSE-Factory" imageinclude="true" priority="99">
+    <source path="obs://openSUSE:Factory/standard"/>
+  </repository>
+
+  <!-- JWM gives Phoenix a Puppy/NoblePup-style desktop. It currently comes
+       from an OBS community repository because it is not in openSUSE:Factory. -->
+  <repository type="rpm-md" alias="jwm-community" imageinclude="true" priority="98">
+    <source path="obs://home:Ledest:misc/openSUSE_Tumbleweed"/>
+  </repository>
+
+  <!-- Wine provides Windows .exe/.msi compatibility for the 32-bit image. -->
+  <repository type="rpm-md" alias="wine-community" imageinclude="true" priority="97">
+    <source path="obs://Emulators:Wine/openSUSE_Tumbleweed"/>
+  </repository>
+
+  <packages type="bootstrap">
+    <package name="filesystem"/>
+    <package name="glibc"/>
+    <package name="rpm"/>
+    <package name="zypper"/>
+  </packages>
+
+  <packages type="image" profiles="i586-live,v86-live">
+    <package name="dracut-kiwi-live"/>
+    <package name="kiwi-live"/>
+  </packages>
+
+  <packages type="image">
+    <package name="patterns-base-minimal_base"/>
+    <package name="kernel-default"/>
+    <package name="dracut"/>
+    <package name="grub2"/>
+    <package name="grub2-i386-pc"/>
+    <package name="systemd"/>
+    <package name="dbus-1"/>
+    <package name="wicked"/>
+    <package name="iproute2"/>
+    <package name="iputils"/>
+    <package name="openssh"/>
+    <package name="sudo"/>
+    <package name="vim-small"/>
+    <package name="less"/>
+    <package name="bash-completion"/>
+    <package name="ca-certificates"/>
+    <package name="openSUSE-release"/>
+
+    <!-- Puppy/NoblePup-inspired lightweight desktop stack. -->
+    <package name="xorg-x11-server"/>
+    <package name="xinit"/>
+    <package name="xterm"/>
+    <package name="jwm"/>
+    <package name="icewm"/>
+    <package name="lightdm"/>
+    <package name="lightdm-gtk-greeter"/>
+    <package name="xf86-video-fbdev"/>
+    <package name="xf86-video-vesa"/>
+    <package name="fontconfig"/>
+    <package name="dejavu-fonts"/>
+    <package name="leafpad"/>
+    <package name="pcmanfm"/>
+
+    <!-- Compatibility and file-opening helpers for Windows and Linux downloads. -->
+    <package name="wine"/>
+    <package name="cabextract"/>
+    <package name="7zip"/>
+    <package name="zip"/>
+    <package name="unzip"/>
+    <package name="tar"/>
+    <package name="gzip"/>
+    <package name="bzip2"/>
+    <package name="xz"/>
+    <package name="file"/>
+    <package name="fuse"/>
+    <package name="libfuse2"/>
+    <package name="xdg-utils"/>
+    <package name="desktop-file-utils"/>
+    <package name="shared-mime-info"/>
+  </packages>
+</image>

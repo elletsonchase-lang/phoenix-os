@@ -5,6 +5,9 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-iso:
     runs-on: ubuntu-latest
@@ -21,7 +24,9 @@ jobs:
             opensuse/tumbleweed \
             bash -c "
               set -euxo pipefail
+
               zypper --non-interactive --gpg-auto-import-keys refresh
+
               zypper --non-interactive install --no-recommends \
                 python3-kiwi \
                 kiwi-systemdeps-iso-media \
@@ -30,12 +35,22 @@ jobs:
                 squashfs \
                 xorriso \
                 grub2 \
-                grub2-i386-pc
+                grub2-i386-pc \
+                glibc-32bit \
+                libgcc_s1-32bit \
+                qemu-linux-user \
+                linux32
+
               mkdir -p dist build/v86
-              kiwi-ng --profile v86-live --type iso system build \
+
+              kiwi-ng --debug --profile v86-live --type iso system build \
                 --description /workspace \
                 --target-dir /workspace/build/v86
+
               iso=\$(find /workspace/build/v86 -maxdepth 1 -name '*.iso' | head -1)
+              if [[ -z \"\$iso\" ]]; then
+                echo 'ERROR: No ISO produced. Build contents:' && ls /workspace/build/v86/ && exit 1
+              fi
               cp -f \"\$iso\" /workspace/dist/phoenix-v86.iso
               echo 'ISO ready: /workspace/dist/phoenix-v86.iso'
             "

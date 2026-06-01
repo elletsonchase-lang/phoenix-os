@@ -44,7 +44,7 @@ jobs:
             mkdir -p /workspace/dist /workspace/build/v86
 
             echo "=== Running KIWI build ==="
-            kiwi-ng --debug --profile v86-live --type iso system build \
+            kiwi-ng --debug --profile v86-live --type iso --target-arch i586 system build \
               --description /workspace \
               --target-dir /workspace/build/v86
 

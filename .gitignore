@@ -1,0 +1,9 @@
+# Local KIWI build output and generated ISO artifacts.
+build/
+dist/
+*.iso
+*.img
+*.raw
+*.qcow2
+*.img.xz
+*.raw.xz

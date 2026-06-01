@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Run Windows Program
+Comment=Run a Windows EXE or MSI with Wine
+Exec=wine %f
+Terminal=false
+MimeType=application/x-ms-dos-executable;application/x-msdownload;application/x-msi;application/x-ms-shortcut;application/vnd.microsoft.portable-executable;
+Categories=Utility;Emulator;

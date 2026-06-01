@@ -16,55 +16,59 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Write build script
+        run: |
+          cat > docker-build.sh << 'EOF'
+          #!/bin/bash
+          set -euo pipefail
+
+          echo "=== Installing KIWI NG ==="
+          zypper --non-interactive --gpg-auto-import-keys refresh
+          zypper --non-interactive install --no-recommends \
+            python3-kiwi \
+            kiwi-systemdeps-iso-media \
+            kiwi-systemdeps-filesystems \
+            kiwi-systemdeps-bootloaders \
+            squashfs \
+            xorriso \
+            grub2 \
+            grub2-i386-pc \
+            glibc-32bit \
+            libgcc_s1-32bit \
+            qemu-linux-user \
+            linux32
+
+          mkdir -p /workspace/dist /workspace/build/v86
+
+          echo "=== Running KIWI build ==="
+          kiwi-ng --debug --profile v86-live --type iso system build \
+            --description /workspace \
+            --target-dir /workspace/build/v86 \
+            > /workspace/kiwi-build.log 2>&1 || {
+              echo "=== KIWI BUILD FAILED — last 100 lines: ==="
+              tail -100 /workspace/kiwi-build.log
+              exit 1
+            }
+
+          echo "=== Locating ISO ==="
+          iso=$(find /workspace/build/v86 -maxdepth 1 -name "*.iso" | head -1)
+          if [[ -z "$iso" ]]; then
+            echo "ERROR: No ISO was produced. Build dir:"
+            ls -la /workspace/build/v86/ || true
+            exit 1
+          fi
+          cp -f "$iso" /workspace/dist/phoenix-v86.iso
+          echo "ISO ready: /workspace/dist/phoenix-v86.iso"
+          EOF
+          chmod +x docker-build.sh
+
       - name: Build ISO inside openSUSE Tumbleweed container
         run: |
-          mkdir -p dist build/v86
           docker run --rm --privileged \
             -v "${{ github.workspace }}:/workspace" \
             -w /workspace \
             opensuse/tumbleweed \
-            bash -c '
-              set -euxo pipefail
-
-              zypper --non-interactive --gpg-auto-import-keys refresh
-
-              zypper --non-interactive install --no-recommends \
-                python3-kiwi \
-                kiwi-systemdeps-iso-media \
-                kiwi-systemdeps-filesystems \
-                kiwi-systemdeps-bootloaders \
-                squashfs \
-                xorriso \
-                grub2 \
-                grub2-i386-pc \
-                glibc-32bit \
-                libgcc_s1-32bit \
-                qemu-linux-user \
-                linux32
-
-              mkdir -p /workspace/dist /workspace/build/v86
-
-              kiwi-ng --debug --profile v86-live --type iso system build \
-                --description /workspace \
-                --target-dir /workspace/build/v86 \
-                2>&1 | tee /workspace/kiwi-build.log
-              KIWI=${PIPESTATUS[0]}
-
-              if [[ $KIWI -ne 0 ]]; then
-                echo "=== BUILD FAILED — last 100 lines of kiwi log: ==="
-                tail -100 /workspace/kiwi-build.log
-                exit $KIWI
-              fi
-
-              iso=$(find /workspace/build/v86 -maxdepth 1 -name "*.iso" | head -1)
-              if [[ -z "$iso" ]]; then
-                echo "ERROR: No ISO produced"
-                ls -la /workspace/build/v86/ || true
-                exit 1
-              fi
-              cp -f "$iso" /workspace/dist/phoenix-v86.iso
-              echo "ISO ready: /workspace/dist/phoenix-v86.iso"
-            '
+            bash /workspace/docker-build.sh
 
       - name: Upload build log
         if: always()

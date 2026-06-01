@@ -1,0 +1,58 @@
+#!/bin/sh
+# Open common downloaded files in the lightweight Phoenix desktop.
+set -eu
+
+if [ "$#" -eq 0 ]; then
+    echo "Usage: phoenix-open FILE" >&2
+    exit 64
+fi
+
+target=$1
+if [ ! -e "$target" ]; then
+    echo "File not found: $target" >&2
+    exit 66
+fi
+
+lower=$(printf '%s' "$target" | tr '[:upper:]' '[:lower:]')
+
+run_in_terminal() {
+    title=$1
+    shift
+    if command -v xterm >/dev/null 2>&1; then
+        exec xterm -T "$title" -e "$@"
+    fi
+    exec "$@"
+}
+
+case "$lower" in
+    *.exe|*.msi)
+        export WINEPREFIX="${WINEPREFIX:-$HOME/.wine}"
+        exec wine "$target"
+        ;;
+    *.appimage|*.run|*.sh)
+        chmod +x "$target"
+        exec "$target"
+        ;;
+    *.rpm)
+        run_in_terminal "Install RPM" sh -c 'sudo zypper install "$1"; printf "\nPress Enter to close..."; read _' sh "$target"
+        ;;
+    *.zip|*.7z|*.tar|*.tar.gz|*.tgz|*.tar.bz2|*.tbz2|*.tar.xz|*.txz|*.gz|*.bz2|*.xz)
+        dest="${target%.*}-extracted"
+        mkdir -p "$dest"
+        case "$lower" in
+            *.zip) unzip -o "$target" -d "$dest" ;;
+            *.7z) 7zz x -y -o"$dest" "$target" ;;
+            *.tar|*.tar.gz|*.tgz|*.tar.bz2|*.tbz2|*.tar.xz|*.txz) tar -xf "$target" -C "$dest" ;;
+            *.gz) gzip -dc "$target" > "$dest/$(basename "${target%.gz}")" ;;
+            *.bz2) bzip2 -dc "$target" > "$dest/$(basename "${target%.bz2}")" ;;
+            *.xz) xz -dc "$target" > "$dest/$(basename "${target%.xz}")" ;;
+        esac
+        exec pcmanfm "$dest"
+        ;;
+    *)
+        if command -v xdg-open >/dev/null 2>&1; then
+            exec xdg-open "$target"
+        fi
+        exec pcmanfm "$(dirname "$target")"
+        ;;
+esac

@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Home
+Icon=user-home
+Exec=pcmanfm /home/phoenix
+Terminal=false

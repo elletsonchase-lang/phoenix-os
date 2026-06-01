@@ -23,7 +23,7 @@
     <keytable>us</keytable>
     <timezone>UTC</timezone>
     <rpm-excludedocs>true</rpm-excludedocs>
-    <type image="iso" primary="true" flags="overlay" hybrid="true" firmware="bios" bootpartition="false" kernelcmdline="console=tty0 console=ttyS0,115200n8 net.ifnames=0 nomodeset mitigations=off elevator=noop">
+    <type image="iso" primary="true" flags="overlay" firmware="bios" kernelcmdline="console=tty0 console=ttyS0,115200n8 net.ifnames=0 nomodeset mitigations=off elevator=noop">
       <bootloader name="grub2" timeout="5"/>
     </type>
   </preferences>

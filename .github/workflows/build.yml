@@ -20,45 +20,50 @@ jobs:
         run: |
           cat > docker-build.sh << 'EOF'
           #!/bin/bash
-          set -euo pipefail
+          # Run everything in a subshell piped to tee so the log file gets
+          # all output even when set -e exits early due to an error.
+          (
+            set -euo pipefail
 
-          echo "=== Installing KIWI NG ==="
-          zypper --non-interactive --gpg-auto-import-keys refresh
-          zypper --non-interactive install --no-recommends \
-            python3-kiwi \
-            kiwi-systemdeps-iso-media \
-            kiwi-systemdeps-filesystems \
-            kiwi-systemdeps-bootloaders \
-            squashfs \
-            xorriso \
-            grub2 \
-            grub2-i386-pc \
-            glibc-32bit \
-            libgcc_s1-32bit \
-            qemu-linux-user \
-            linux32
+            echo "=== Installing KIWI NG ==="
+            zypper --non-interactive --gpg-auto-import-keys refresh
+            zypper --non-interactive install --no-recommends \
+              python3-kiwi \
+              kiwi-systemdeps-iso-media \
+              kiwi-systemdeps-filesystems \
+              kiwi-systemdeps-bootloaders \
+              squashfs \
+              xorriso \
+              grub2 \
+              grub2-i386-pc \
+              glibc-32bit \
+              libgcc_s1-32bit \
+              qemu-linux-user \
+              linux32
 
-          mkdir -p /workspace/dist /workspace/build/v86
+            mkdir -p /workspace/dist /workspace/build/v86
 
-          echo "=== Running KIWI build ==="
-          kiwi-ng --debug --profile v86-live --type iso system build \
-            --description /workspace \
-            --target-dir /workspace/build/v86 \
-            > /workspace/kiwi-build.log 2>&1 || {
-              echo "=== KIWI BUILD FAILED — last 100 lines: ==="
-              tail -100 /workspace/kiwi-build.log
+            echo "=== Running KIWI build ==="
+            kiwi-ng --debug --profile v86-live --type iso system build \
+              --description /workspace \
+              --target-dir /workspace/build/v86
+
+            echo "=== Locating ISO ==="
+            iso=$(find /workspace/build/v86 -maxdepth 1 -name "*.iso" | head -1)
+            if [[ -z "$iso" ]]; then
+              echo "ERROR: No ISO produced. Build dir:"
+              ls -la /workspace/build/v86/ || true
               exit 1
-            }
+            fi
+            cp -f "$iso" /workspace/dist/phoenix-v86.iso
+            echo "ISO ready: /workspace/dist/phoenix-v86.iso"
+          ) 2>&1 | tee /workspace/kiwi-build.log
 
-          echo "=== Locating ISO ==="
-          iso=$(find /workspace/build/v86 -maxdepth 1 -name "*.iso" | head -1)
-          if [[ -z "$iso" ]]; then
-            echo "ERROR: No ISO was produced. Build dir:"
-            ls -la /workspace/build/v86/ || true
-            exit 1
+          BUILD_EXIT=${PIPESTATUS[0]}
+          if [[ $BUILD_EXIT -ne 0 ]]; then
+            echo "=== BUILD FAILED (exit $BUILD_EXIT) ==="
+            exit $BUILD_EXIT
           fi
-          cp -f "$iso" /workspace/dist/phoenix-v86.iso
-          echo "ISO ready: /workspace/dist/phoenix-v86.iso"
           EOF
           chmod +x docker-build.sh
 
@@ -68,7 +73,11 @@ jobs:
             -v "${{ github.workspace }}:/workspace" \
             -w /workspace \
             opensuse/tumbleweed \
-            bash /workspace/docker-build.sh
+            bash /workspace/docker-build.sh || {
+              echo "=== Container failed. Build log: ==="
+              cat kiwi-build.log || echo "(kiwi-build.log not found)"
+              exit 1
+            }
 
       - name: Upload build log
         if: always()

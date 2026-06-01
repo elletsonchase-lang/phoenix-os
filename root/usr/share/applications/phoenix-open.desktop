@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Phoenix File Opener
+Comment=Open EXE, AppImage, RPM, scripts, and archives
+Exec=/usr/local/bin/phoenix-open %f
+Terminal=false
+MimeType=application/x-ms-dos-executable;application/x-msdownload;application/x-msi;application/x-ms-shortcut;application/vnd.microsoft.portable-executable;application/x-executable;application/x-shellscript;application/x-rpm;application/zip;application/x-7z-compressed;application/x-tar;application/gzip;application/x-bzip2;application/x-xz;
+Categories=Utility;

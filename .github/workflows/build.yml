@@ -1,0 +1,40 @@
+name: Build Phoenix OS ISO
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+    container:
+      image: opensuse/leap:15.6
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install KIWI NG
+        run: |
+          zypper --non-interactive refresh
+          zypper --non-interactive install --no-recommends \
+            python3-kiwi \
+            kiwi-systemdeps-iso-media \
+            kiwi-systemdeps-filesystems \
+            kiwi-systemdeps-bootloaders \
+            gfxboot \
+            grub2 \
+            isolinux \
+            squashfs \
+            xorriso
+
+      - name: Build ISO
+        run: bash scripts/build-v86-iso.sh dist
+
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-v86-iso
+          path: dist/phoenix-v86.iso
+          retention-days: 30

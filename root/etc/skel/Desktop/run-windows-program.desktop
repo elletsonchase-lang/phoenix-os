@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Run Windows Program
+Icon=wine
+Exec=xterm -T "Run Windows Program" -e sh -c 'printf "Drag a .exe into Files, or run: wine /path/to/program.exe\n\n"; winecfg; printf "\nPress Enter to close..."; read _'
+Terminal=false

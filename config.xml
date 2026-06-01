@@ -11,9 +11,9 @@
   </description>
 
   <profiles>
-    <profile name="i586-live" description="Phoenix OS live ISO for legacy 32-bit x86 systems" arch="i586"/>
-    <profile name="v86-live" description="Phoenix OS live ISO tuned for the v86 browser emulator" arch="i586"/>
-    <profile name="v86-disk" description="Phoenix OS hard-disk image tuned for persistent v86 use" arch="i586"/>
+    <profile name="i586-live" description="Phoenix OS live ISO for legacy 32-bit x86 systems"/>
+    <profile name="v86-live" description="Phoenix OS live ISO tuned for the v86 browser emulator"/>
+    <profile name="v86-disk" description="Phoenix OS hard-disk image tuned for persistent v86 use"/>
   </profiles>
 
   <preferences profiles="i586-live,v86-live">

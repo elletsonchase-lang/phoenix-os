@@ -18,6 +18,7 @@ jobs:
 
       - name: Build ISO inside openSUSE Tumbleweed container
         run: |
+          mkdir -p dist build/v86
           docker run --rm --privileged \
             -v "${{ github.workspace }}:/workspace" \
             -w /workspace \
@@ -45,7 +46,8 @@ jobs:
 
               kiwi-ng --debug --profile v86-live --type iso system build \
                 --description /workspace \
-                --target-dir /workspace/build/v86
+                --target-dir /workspace/build/v86 \
+                2>&1 | tee /workspace/kiwi-build.log
 
               iso=\$(find /workspace/build/v86 -maxdepth 1 -name '*.iso' | head -1)
               if [[ -z \"\$iso\" ]]; then
@@ -53,7 +55,15 @@ jobs:
               fi
               cp -f \"\$iso\" /workspace/dist/phoenix-v86.iso
               echo 'ISO ready: /workspace/dist/phoenix-v86.iso'
-            "
+            " 2>&1 | tee kiwi-build.log || true
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kiwi-build-log
+          path: kiwi-build.log
+          retention-days: 7
 
       - name: Upload ISO
         uses: actions/upload-artifact@v4

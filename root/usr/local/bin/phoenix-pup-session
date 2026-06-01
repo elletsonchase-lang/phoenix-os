@@ -1,0 +1,12 @@
+#!/bin/sh
+# Puppy-inspired desktop session: desktop icons/pinboard plus a tiny window manager.
+
+xsetroot -solid '#2f5f8f'
+pcmanfm --desktop --profile phoenix-pup >/tmp/pcmanfm-desktop.log 2>&1 &
+
+if command -v jwm >/dev/null 2>&1; then
+    exec jwm
+fi
+
+# Fallback: keep the image usable even if the optional JWM repository is unavailable.
+exec icewm-session

@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=Phoenix Pup
+Comment=Puppy-inspired JWM desktop for Phoenix OS
+Exec=/usr/local/bin/phoenix-pup-session
+Type=Application

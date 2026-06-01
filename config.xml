@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="7.5" name="Phoenix-OS">
+<image schemaversion="7.6" name="Phoenix-OS">
   <description type="system">
     <author>Phoenix OS contributors</author>
     <contact>maintainers@example.invalid</contact>
@@ -35,7 +35,7 @@
     <keytable>us</keytable>
     <timezone>UTC</timezone>
     <rpm-excludedocs>true</rpm-excludedocs>
-    <type image="oem" filesystem="ext4" format="raw" firmware="bios" bootpartition="true" bootfilesystem="ext4" devicepersistency="by-uuid" kernelcmdline="console=tty0 console=ttyS0,115200n8 net.ifnames=0 nomodeset mitigations=off elevator=noop">
+    <type image="oem" filesystem="ext4" firmware="bios" bootpartition="true" bootfilesystem="ext4" devicepersistency="by-uuid" kernelcmdline="console=tty0 console=ttyS0,115200n8 net.ifnames=0 nomodeset mitigations=off elevator=noop">
       <bootloader name="grub2" timeout="5"/>
       <size unit="G">3</size>
     </type>

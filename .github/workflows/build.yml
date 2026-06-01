@@ -8,29 +8,37 @@ on:
 jobs:
   build-iso:
     runs-on: ubuntu-latest
-    container:
-      image: opensuse/leap:15.6
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install KIWI NG
+      - name: Build ISO inside openSUSE Tumbleweed container
         run: |
-          zypper --non-interactive refresh
-          zypper --non-interactive install --no-recommends \
-            python3-kiwi \
-            kiwi-systemdeps-iso-media \
-            kiwi-systemdeps-filesystems \
-            kiwi-systemdeps-bootloaders \
-            gfxboot \
-            grub2 \
-            isolinux \
-            squashfs \
-            xorriso
-
-      - name: Build ISO
-        run: bash scripts/build-v86-iso.sh dist
+          docker run --rm --privileged \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace \
+            opensuse/tumbleweed \
+            bash -c "
+              set -euxo pipefail
+              zypper --non-interactive --gpg-auto-import-keys refresh
+              zypper --non-interactive install --no-recommends \
+                python3-kiwi \
+                kiwi-systemdeps-iso-media \
+                kiwi-systemdeps-filesystems \
+                kiwi-systemdeps-bootloaders \
+                squashfs \
+                xorriso \
+                grub2 \
+                grub2-i386-pc
+              mkdir -p dist build/v86
+              kiwi-ng --profile v86-live --type iso system build \
+                --description /workspace \
+                --target-dir /workspace/build/v86
+              iso=\$(find /workspace/build/v86 -maxdepth 1 -name '*.iso' | head -1)
+              cp -f \"\$iso\" /workspace/dist/phoenix-v86.iso
+              echo 'ISO ready: /workspace/dist/phoenix-v86.iso'
+            "
 
       - name: Upload ISO
         uses: actions/upload-artifact@v4

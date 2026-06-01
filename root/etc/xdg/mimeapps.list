@@ -1,0 +1,15 @@
+[Default Applications]
+application/x-ms-dos-executable=wine-exe.desktop
+application/x-msdownload=wine-exe.desktop
+application/x-msi=wine-exe.desktop
+application/x-ms-shortcut=wine-exe.desktop
+application/vnd.microsoft.portable-executable=wine-exe.desktop
+application/x-rpm=phoenix-open.desktop
+application/x-executable=phoenix-open.desktop
+application/x-shellscript=phoenix-open.desktop
+application/zip=phoenix-open.desktop
+application/x-7z-compressed=phoenix-open.desktop
+application/x-tar=phoenix-open.desktop
+application/gzip=phoenix-open.desktop
+application/x-bzip2=phoenix-open.desktop
+application/x-xz=phoenix-open.desktop

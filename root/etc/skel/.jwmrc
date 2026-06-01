@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<JWM>
+  <RootMenu height="24" onroot="12">
+    <Program label="Terminal">xterm</Program>
+    <Program label="Files">pcmanfm</Program>
+    <Program label="Editor">leafpad</Program>
+    <Separator/>
+    <Restart label="Restart JWM"/>
+    <Exit label="Exit" confirm="true"/>
+  </RootMenu>
+
+  <Tray x="0" y="-1" height="28">
+    <TrayButton label="Menu">root:1</TrayButton>
+    <Spacer width="4"/>
+    <Pager/>
+    <TaskList maxwidth="256"/>
+    <Dock/>
+    <Clock format="%H:%M"/>
+  </Tray>
+
+  <Desktops count="2"/>
+  <StartupCommand>pcmanfm --desktop --profile phoenix-pup</StartupCommand>
+  <FocusModel>sloppy</FocusModel>
+  <IconPath>/usr/share/pixmaps</IconPath>
+  <IconPath>/usr/share/icons/hicolor/48x48/apps</IconPath>
+</JWM>

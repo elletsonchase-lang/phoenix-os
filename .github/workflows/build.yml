@@ -17,13 +17,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build ISO inside openSUSE Tumbleweed container
+        shell: bash
         run: |
+          set -o pipefail
           mkdir -p dist build/v86
           docker run --rm --privileged \
             -v "${{ github.workspace }}:/workspace" \
             -w /workspace \
             opensuse/tumbleweed \
-            bash -c "
+            bash -c '
               set -euxo pipefail
 
               zypper --non-interactive --gpg-auto-import-keys refresh
@@ -42,20 +44,21 @@ jobs:
                 qemu-linux-user \
                 linux32
 
-              mkdir -p dist build/v86
+              mkdir -p /workspace/dist /workspace/build/v86
 
               kiwi-ng --debug --profile v86-live --type iso system build \
                 --description /workspace \
-                --target-dir /workspace/build/v86 \
-                2>&1 | tee /workspace/kiwi-build.log
+                --target-dir /workspace/build/v86
 
-              iso=\$(find /workspace/build/v86 -maxdepth 1 -name '*.iso' | head -1)
-              if [[ -z \"\$iso\" ]]; then
-                echo 'ERROR: No ISO produced. Build contents:' && ls /workspace/build/v86/ && exit 1
+              iso=$(find /workspace/build/v86 -maxdepth 1 -name "*.iso" | head -1)
+              if [[ -z "$iso" ]]; then
+                echo "ERROR: No ISO produced. Build dir contents:"
+                ls -la /workspace/build/v86/ || true
+                exit 1
               fi
-              cp -f \"\$iso\" /workspace/dist/phoenix-v86.iso
-              echo 'ISO ready: /workspace/dist/phoenix-v86.iso'
-            " 2>&1 | tee kiwi-build.log || true
+              cp -f "$iso" /workspace/dist/phoenix-v86.iso
+              echo "ISO ready: /workspace/dist/phoenix-v86.iso"
+            ' 2>&1 | tee kiwi-build.log
 
       - name: Upload build log
         if: always()
